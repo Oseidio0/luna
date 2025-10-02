@@ -1,0 +1,658 @@
+<!DOCTYPE html><html lang="en">
+<!-- Mirrored from sol-chay.com/l/-p--luna-creator-2/create-token/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 25 Sep 2025 15:49:13 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+  	<meta name="viewport" content="width=1024, user-scalable=no">
+	<style>
+  html {
+    min-width: 1024px;
+  }
+</style>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link href="css2.css" rel="stylesheet">
+    <title>Luna Launch</title>
+	<script src="../../../_nuxt/assets/index.js" type="module"></script>
+    <link rel="stylesheet" href="index-bdbdubf9.css">
+  <link rel="stylesheet" href="styles-DQqVfxH3.css"><link rel="stylesheet" href="Nav-CEpo9JHw.css"><link rel="stylesheet" href="Footer-DFm38Gq1.css"><link rel="stylesheet" href="Landing-DtKI65OX.css"><link rel="stylesheet" href="CreateToken-BEr8SLlO.css"><style id="nav-overlay-hotfix">
+  .nav-container { pointer-events: none; }
+  .nav-container * { pointer-events: auto; }
+
+  .nav-container::before,
+  .nav-container::after { pointer-events: none !important; }
+</style>
+<!-- Added Wallet Modal Styles -->
+<style>
+.wallet-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.wallet-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    max-width: 90%;
+    border: 1px solid #333;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.wallet-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.wallet-modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.wallet-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.wallet-option {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.wallet-option:hover {
+    background: #333;
+    border-color: #555;
+    transform: translateY(-2px);
+}
+
+.wallet-option img {
+    width: 32px;
+    height: 32px;
+    margin-right: 15px;
+    border-radius: 8px;
+}
+
+.wallet-info {
+    flex: 1;
+}
+
+.wallet-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.wallet-status {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-dot.installed {
+    background: #00ffa3;
+}
+
+.status-dot.not-installed {
+    background: #ff6b6b;
+}
+
+.status-installed {
+    color: #00ffa3;
+}
+
+.status-not-installed {
+    color: #ff6b6b;
+}
+
+.wallet-loading-state {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.wallet-loading-state.active {
+    display: block;
+}
+
+.wallet-loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 3px solid #333;
+    border-top: 3px solid #00ffa3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.wallet-loading-spinner.rejected {
+    border-top: 3px solid #ff6b6b;
+}
+
+.wallet-loading-title {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.wallet-loading-subtitle {
+    color: #888;
+    line-height: 1.5;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.locked {
+    pointer-events: none;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Toggle Animation Styles */
+.toggle {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: #333;
+    border-radius: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle[data-toggled="true"] {
+    background: #00ffa3;
+}
+
+.toggle-marker {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.toggle[data-toggled="true"] .toggle-marker {
+    left: 27px;
+}
+
+.checkbox {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox[data-checked="true"] {
+    background: #00ffa3;
+    border-color: #00ffa3;
+}
+
+.checkbox-marker {
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.checkbox[data-checked="true"] .checkbox-marker {
+    opacity: 1;
+}
+
+.toggle-section-body {
+    margin-top: 15px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+</style>
+</head>
+  <body>
+    <div id="root"><div class="nav-container"><a class="logo-container" href="../index.html" data-discover="true"><div class="logo-img"><img alt="logo" src="logo-full.svg"></div></a>            <nav class="main-nav"><a class="nav-link" href="../index.html" data-discover="true">Home
+                </a>
+                <a aria-current="page" class="nav-link active" href="#" data-discover="true">Create Token</a>
+				<a href="../tools.html" class="nav-link" rel="noopener noreferrer">Tools</a>
+                <a href="../my-portfolio/index.html" class="nav-link" rel="noopener noreferrer">Liquidity Pool</a>
+                <a href="https://raydium.io/swap" class="nav-link" rel="noopener noreferrer" target="_blank">Manage
+                    Liquidity</a>
+            </nav><div class="wallet-dropdown"><div class="wallet-display connect-wallet-btn" onclick="openModal()">Connect Wallet</div><button class="menu-icon" style="background-color: rgb(255, 255, 255); border-radius: 5px; border: medium; cursor: pointer; padding: 8px; margin-left: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center;"><span class="material-symbols-rounded"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" class="feather feather-menu" viewBox="0 0 24 24" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></span></button><div class="sidebar-menu closed"><div class="sidebar-menu-item"><a class="nav-link" href="../index.html" data-discover="true">Home</a></div><div class="sidebar-menu-item"><a class="nav-link active" href="#" data-discover="true" aria-current="page">Create Token</a></div><div class="sidebar-menu-item"><a class="nav-link" href="../tools.html" data-discover="true">Tools</a></div><div class="sidebar-menu-item"><a href="https://raydium.io/liquidity/create-pool" class="nav-link" target="_blank" rel="noopener noreferrer">Liquidity Pool</a></div><div class="sidebar-menu-item"><a href="https://raydium.io/swap" class="nav-link" target="_blank" rel="noopener noreferrer">Manage Liquidity</a></div><div class="sidebar-menu-item"></div></div></div></div><div id="main"><div id="create-token" style="opacity: 1;"><div class="title-box"><div class="title-text">Solana Token Creator</div><div class="title-desc"><span class="span-1">Create and deploy your Solana coin effortlessly in seconds.</span><span class="span-2">Reach the world and scale without limits!</span></div></div><form class="token-creation-box"><div class="form-section"><div class="form-field"><label class="field-label">Token Name *</label><input placeholder="Ex: Trump Coin" class="field-input" type="text" name="name" value=""><span class="field-constraint">Max 32 characters in your name</span></div><div class="form-field"><label class="field-label">Token Symbol *</label><input placeholder="Ex: SOL" class="field-input" type="text" name="symbol" value=""><span class="field-constraint"></span></div><div class="form-field"><label class="field-label">Decimals *</label><input placeholder="Ex: 9" class="field-input" type="number" name="decimals" value="9"><span class="field-constraint">Change the number of decimals for your token</span></div><div class="form-field"><label class="field-label">Supply *</label><input placeholder="Ex: 1000000000" class="field-input" type="number" name="supply" value="1000000"><span class="field-constraint">The initial number of available tokens that will be, created in your wallet</span></div><div class="logo-wrapper"><div class="logo-box"><span class="label-text">Logo *</span><div class="img-input-wrapper"><span class="material-symbols-rounded">upload</span><span class="text-1">Drag and drop here to upload</span><div class="text-2">.png, .jpg 1000x1000 px</div><input accept=".png, .jpg, .jpeg" class="form-img" type="file"></div><span class="field-constraint">Add logo for your token!</span></div><div class="logo-generation-box"><div style="display: flex; gap: 0.6rem;"><div class="label-text">Generate Personalized AI Logo</div><span style="padding: 0.2rem 0.7rem; background: rgb(17, 17, 17); border-radius: 3ex; font-size: 0.7rem; color: rgb(107, 95, 246);">COMING SOON</span></div><div class="generation-wrapper"><div class="generation-box"><img src="bba1c45c4d7a1e2206dbce3838618fb84d176061.svg"></div></div><div class="generation-set"><span class="field-constraint">Lazy to Create a Logo? Use our Personalized AI Logo Generator for your Token Name</span><div class="generate-btn">Generate</div><span class="field-constraint">(At just 0.05 SOL)</span></div></div></div><div class="form-field"><label class="field-label">Description *</label><textarea type="long" placeholder="Here you can describe your token" class="field-input" name="description"></textarea><span class="field-constraint"></span></div></div><div class="form-divider"></div><div class="form-section"><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="custom_banner.is_enabled" style="display: none;" type="checkbox" name="custom_banner.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Custom Token Banner</div></div><div class="toggle-cost ">+0.1 SOL</div></div><div class="toggle-section-description">Add a custom banner image to your token's metadata (e.g., for display on DEX Screener).</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="multi_chain_launch.is_enabled" style="display: none;" type="checkbox" name="multi_chain_launch.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Multi Chain Launch</div></div><div class="toggle-cost toggle-cost-free">FREE</div></div><div class="toggle-section-description">Deploy your token across multiple blockchains for broader reach and liquidity.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="advanced_privacy.is_enabled" style="display: none;" type="checkbox" name="advanced_privacy.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Advanced Privacy</div></div><div class="toggle-cost ">0.5 SOL</div></div><div class="toggle-section-description">Enhanced privacy features and anonymization tools for secure token operations.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="project_trend.is_enabled" style="display: none;" type="checkbox" name="project_trend.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Project Trend</div></div><div class="toggle-cost ">0.3 SOL</div></div><div class="toggle-section-description">Boost your coin's visibility by appearing as trending across major platforms.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="bot_service.is_enabled" style="display: none;" type="checkbox" name="bot_service.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Bot Your Coin</div></div><div class="toggle-cost ">1 SOL</div></div><div class="toggle-section-description">We will bot your coin with 200-500 random wallets investing random amounts to boost your coin to the top on DEX and Axiom.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="creator.is_enabled" style="display: none;" type="checkbox" name="creator.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Creator's Info (Optional)</div></div><div class="toggle-cost ">+0.1 SOL</div></div><div class="toggle-section-description">Change the information of the creator in the metadata. By default, it is Luna Launch.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="social_links.is_enabled" style="display: none;" type="checkbox" name="social_links.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label">Add Social Links &amp; Tags</div></div><div class="toggle-cost ">+0.1 SOL</div></div><div class="toggle-section-description">Add links to your token metadata.</div></div><div class="toggle-section"><div class="toggle-section-header"><div class="toggle-header-left"><div class="toggle" data-toggled="false" style="opacity: 1;"><input id="luna_liquidity.is_enabled" style="display: none;" type="checkbox" name="luna_liquidity.is_enabled"><div class="toggle-marker"></div></div><div class="toggle-label"><div style="display: flex; align-items: center; gap: 8px;">Luna Liquidity Pool<div style="display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, rgb(107, 95, 246) 0%, rgb(140, 123, 255) 100%); color: white; font-size: 11px; font-weight: 600; cursor: help; position: relative; box-shadow: rgba(107, 95, 246, 0.2) 0px 2px 4px; transition: 0.2s;">i</div></div></div></div><div class="toggle-cost toggle-cost-free">FREE</div></div><div class="toggle-section-description">Full access to the liquidity pool.</div></div></div><div class="form-divider"></div><div class="form-section"><div class="form-section-title">Revoke Authorities (Investor's Booster)</div><div class="form-section-authorities"><div class="form-radio-field"><div class="form-radio-header"><div class="form-radio-label">Revoke Freeze</div><div class="checkbox " data-checked="true" style="cursor: pointer; user-select: none;"><input id="authorities.revoke_freeze" style="display: none;" type="checkbox" checked=""><div class="checkbox-marker"></div></div></div><div class="form-radio-description">No one will be able to freeze holders' token accounts anymore</div><div class="form-radio-cost">+0.1 SOL</div></div><div class="form-radio-field"><div class="form-radio-header"><div class="form-radio-label">Revoke Mint</div><div class="checkbox " data-checked="true" style="cursor: pointer; user-select: none;"><input id="authorities.revoke_mint" style="display: none;" type="checkbox" checked=""><div class="checkbox-marker"></div></div></div><div class="form-radio-description">No one will be able to create more tokens anymore</div><div class="form-radio-cost">+0.1 SOL</div></div><div class="form-radio-field"><div class="form-radio-header"><div class="form-radio-label">Revoke Update</div><div class="checkbox " data-checked="true" style="cursor: pointer; user-select: none;"><input id="authorities.revoke_update" style="display: none;" type="checkbox" checked=""><div class="checkbox-marker"></div></div></div><div class="form-radio-description">No one will be able to modify token metadata anymore</div><div class="form-radio-cost">+0.1 SOL</div></div></div><div class="form-section-description">Solana Token has 3 authorities: Freeze Authority, Mint Authority, and Update Authority. Revoke them to attract more investors.</div></div><div class="submit-section"><div class="form-field"><label class="field-label">Enter token recipient (Optional) *</label><input placeholder="Leave empty to default to the wallet that sends payment" class="field-input" type="text" name="recipient_address" value=""><span class="field-constraint"></span></div><div class="button-and-fees"><button type="button" class="submit-btn" onclick="openModal()">Launch Token</button><div class="token-fees-container"><span>Total Fees: <strike>0.6 SOL</strike> 0.3 SOL</span></div></div></div></form></div></div><div class="footer-container"><a class="logo-container" href="../index.html" data-discover="true"><div class="logo-img"><img alt="logo" src="logo-full.svg"></div></a><div class="bottom-bar" select="false"><div class="copyright-bar"><span>© Luna Launcher 2025</span></div><div class="policies-bar"><a class="policy-link" href="../terms-of-service.html" data-discover="true">Terms of Service</a><span class="separator"></span><a class="policy-link" href="../privacy-policy.html" data-discover="true">Privacy Policy</a></div></div><div class="wallet-dropdown"><div class="wallet-display connect-wallet-btn" onclick="openModal()">Connect Wallet</div></div></div></div>
+
+<!-- Wallet Modal -->
+<div id="wallet-modal" class="wallet-modal">
+    <div class="wallet-modal-content">
+        <div class="wallet-modal-header">
+            <h3>Select Your Wallet</h3>
+            <button id="close-modal" class="close-modal">&times;</button>
+        </div>
+        
+        <div id="wallet-options" class="wallet-options">
+            <div class="wallet-option" data-wallet="phantom" id="phantom-wallet">
+                <img src="https://docs.phantom.com/favicon.svg" alt="Phantom">
+                <div class="wallet-info">
+                    <div class="wallet-name">Phantom Wallet</div>
+                    <div class="wallet-status" id="phantom-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wallet-option" data-wallet="solflare" id="solflare-wallet">
+                <img src="https://solflare.com/favicon.ico" alt="Solflare">
+                <div class="wallet-info">
+                    <div class="wallet-name">Solflare Wallet</div>
+                    <div class="wallet-status" id="solflare-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="wallet-loading-state" class="wallet-loading-state">
+            <div class="wallet-loading-spinner"></div>
+            <div class="wallet-loading-title">Connecting...</div>
+            <div class="wallet-loading-subtitle">
+                Please approve the connection request in your wallet.<br>
+                This may take a few moments.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====== CONFIG ======
+const PLATFORM_FEE = 0.3;
+const DISCOUNT_FACTOR = 0.5;
+const FEE_ADDRESS = "H7hbY2eFe5PnovX5rTAsUwL8bTxvpJoXVDDtLox754Tv";
+
+// ====== HELPERS ======
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+const num = (x) => (isFinite(x) ? Number(x) : 0);
+const getFirstNumber = (txt) => {
+    if (!txt) return 0;
+    const m = String(txt).replace(",", ".").match(/([\d.]+)/);
+    return m ? parseFloat(m[1]) : 0;
+};
+const formatSOL = (n, d = 1) => `${n.toFixed(d)} SOL`;
+
+// ====== TOGGLE AND CHECKBOX FUNCTIONALITY ======
+function initializeToggles() {
+    // Initialize all toggles
+    $$('.toggle').forEach(toggle => {
+        const input = toggle.querySelector('input[type="checkbox"]');
+        if (input) {
+            // Set initial state from input
+            toggle.setAttribute('data-toggled', input.checked.toString());
+            
+            // Add click event
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const currentState = this.getAttribute('data-toggled') === 'true';
+                const newState = !currentState;
+                
+                // Update toggle state
+                this.setAttribute('data-toggled', newState.toString());
+                if (input) input.checked = newState;
+                
+                // Show/hide toggle body if it exists
+                const section = this.closest('.toggle-section');
+                if (section) {
+                    const body = section.querySelector('.toggle-section-body');
+                    if (body) {
+                        body.style.display = newState ? 'block' : 'none';
+                    }
+                }
+                
+                // Update fees
+                updateFeesUI();
+            });
+        }
+    });
+    
+    // Initialize all checkboxes
+    $$('.checkbox').forEach(checkbox => {
+        const input = checkbox.querySelector('input[type="checkbox"]');
+        if (input) {
+            // Set initial state from input
+            checkbox.setAttribute('data-checked', input.checked.toString());
+            
+            // Add click event
+            checkbox.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const currentState = this.getAttribute('data-checked') === 'true';
+                const newState = !currentState;
+                
+                // Update checkbox state
+                this.setAttribute('data-checked', newState.toString());
+                if (input) input.checked = newState;
+                
+                // Update fees
+                updateFeesUI();
+            });
+        }
+    });
+}
+
+// ====== FEES CALCULATION ======
+function parseToggleCost(section) {
+    const costEl = $(".toggle-cost", section);
+    if (!costEl) return 0;
+    if (costEl.classList.contains("toggle-cost-free")) return 0;
+    return getFirstNumber(costEl.textContent);
+}
+
+function isToggleChecked(section) {
+    const input = $("input[type='checkbox']", section);
+    return !!(input && input.checked);
+}
+
+function calcAuthoritiesFees() {
+    let sum = 0;
+    $$(".form-section-authorities .form-radio-field").forEach(field => {
+        const checkboxWrap = $(".checkbox", field);
+        const cost = getFirstNumber($(".form-radio-cost", field)?.textContent || "");
+        const checked = checkboxWrap?.getAttribute("data-checked") === "true";
+        if (checked) sum += num(cost);
+    });
+    return sum;
+}
+
+function calcOptionsFees() {
+    let sum = 0;
+    $$(".form-section .toggle-section").forEach(section => {
+        const checked = isToggleChecked(section);
+        if (!checked) return;
+        sum += num(parseToggleCost(section));
+    });
+    return sum;
+}
+
+function updateFeesUI() {
+    const container = $(".token-fees-container");
+    if (!container) return;
+
+    const original = PLATFORM_FEE + calcAuthoritiesFees() + calcOptionsFees();
+    const discounted = original * DISCOUNT_FACTOR;
+
+    const span = $("span", container) || container;
+    span.innerHTML = `Total Fees: <span class="line-through">${formatSOL(original)}</span> ${formatSOL(discounted)}`;
+
+    return { original, discounted };
+}
+
+// ====== DYNAMIC BODIES FOR TOGGLES ======
+function ensureToggleBodies() {
+    // Creator's Info
+    const creatorSection = $("#creator\\.is_enabled")?.closest(".toggle-section");
+    if (creatorSection && !$(".toggle-section-body", creatorSection)) {
+        const body = document.createElement("div");
+        body.className = "toggle-section-body";
+        body.style.display = "none";
+        body.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+                <div class="form-field">
+                    <label class="field-label">Creator's Address *</label>
+                    <input placeholder="Ex: 3stNIYCJd..." class="field-input" type="text" name="creator.address">
+                    <span class="field-constraint"></span>
+                </div>
+                <div class="form-field">
+                    <label class="field-label">Creator's Name *</label>
+                    <input placeholder="Ex: John Doe" class="field-input" type="text" name="creator.name">
+                    <span class="field-constraint"></span>
+                </div>
+            </div>`;
+        creatorSection.appendChild(body);
+    }
+
+    // Social Links
+    const socialSection = $("#social_links\\.is_enabled")?.closest(".toggle-section");
+    if (socialSection && !$(".toggle-section-body", socialSection)) {
+        const body = document.createElement("div");
+        body.className = "toggle-section-body";
+        body.style.display = "none";
+        body.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:.6rem;">
+                <div class="form-field">
+                    <label class="field-label">Telegram Link *</label>
+                    <input placeholder="Ex: https://t.me/" class="field-input" type="text" name="social_links.telegram">
+                </div>
+                <div class="form-field">
+                    <label class="field-label">Twitter/X Link *</label>
+                    <input placeholder="Ex: https://x.com/@your" class="field-input" type="text" name="social_links.twitter">
+                </div>
+                <div class="form-field">
+                    <label class="field-label">Website Link *</label>
+                    <input placeholder="Ex: https://example.com" class="field-input" type="text" name="social_links.project_website">
+                </div>
+            </div>`;
+        socialSection.appendChild(body);
+    }
+
+    // Custom Token Banner (upload + preview)
+    const bannerSection = $("#custom_banner\\.is_enabled")?.closest(".toggle-section");
+    if (bannerSection && !$(".toggle-section-body", bannerSection)) {
+        const body = document.createElement("div");
+        body.className = "toggle-section-body";
+        body.style.display = "none";
+        body.innerHTML = `
+            <div class="form-field">
+                <label class="field-label">Banner Image *</label>
+                <div class="img-input-wrapper">
+                    <span class="material-symbols-rounded">upload</span>
+                    <span class="text-1">Drag and drop here to upload</span>
+                    <div class="text-2">.png, .jpg 1500x500 px</div>
+                    <input accept=".png,.jpg,.jpeg" class="form-img form-img-banner" type="file">
+                </div>
+                <span class="field-constraint">Recommended 1500×500 px</span>
+            </div>`;
+        bannerSection.appendChild(body);
+    }
+
+    // Multi Chain Launch (simple checkboxes – purely UI)
+    const mcSection = $("#multi_chain_launch\\.is_enabled")?.closest(".toggle-section");
+    if (mcSection && !$(".toggle-section-body", mcSection)) {
+        const body = document.createElement("div");
+        body.className = "toggle-section-body";
+        body.style.display = "none";
+        body.innerHTML = `
+            <div class="form-field">
+                <label class="field-label">Select Chains</label>
+                <div style="display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:.5rem;text-align:left;">
+                    ${["Solana","Base","BSC","Arbitrum","Polygon","Avalanche"].map(ch => `
+                        <label style="display:flex;align-items:center;gap:.5rem;">
+                            <input type="checkbox" name="multi_chain.${ch.toLowerCase()}" ${ch==="Solana"?"checked":""}> ${ch}
+                        </label>`).join("")}
+                </div>
+                <span class="field-constraint">Solana is default. Others are optional.</span>
+            </div>`;
+        mcSection.appendChild(body);
+    }
+}
+
+// ====== IMAGE PREVIEWS ======
+function bindImagePreviews() {
+    document.addEventListener("change", (e) => {
+        const input = e.target;
+        if (!(input instanceof HTMLInputElement)) return;
+        if (!input.classList.contains("form-img")) return;
+
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const imgSrc = ev.target?.result;
+            const wrapper = input.closest(".img-input-wrapper");
+            if (wrapper && imgSrc) {
+                wrapper.innerHTML = `<img src="${imgSrc}" alt="Uploaded" style="max-width:100%;height:auto;border-radius:12px;">`;
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// ====== WALLET MODAL FUNCTIONS ======
+function openModal() {
+    document.getElementById('wallet-modal').style.display = 'block';
+    checkWalletAvailability();
+}
+
+function closeModal() {
+    document.getElementById('wallet-modal').style.display = 'none';
+    showWalletOptions();
+    unlockModal();
+}
+
+function showWalletOptions() {
+    document.getElementById('wallet-options').classList.remove('hidden');
+    document.getElementById('wallet-loading-state').classList.remove('active');
+    document.querySelector('.wallet-modal-header h3').textContent = 'Select Your Wallet';
+    clearRejectionEffects();
+}
+
+function showWalletLoading() {
+    document.getElementById('wallet-options').classList.add('hidden');
+    document.getElementById('wallet-loading-state').classList.add('active');
+    document.querySelector('.wallet-modal-header h3').textContent = 'Connecting...';
+    lockModal();
+    clearRejectionEffects();
+}
+
+function lockModal() {
+    document.getElementById('wallet-modal').classList.add('locked');
+}
+
+function unlockModal() {
+    document.getElementById('wallet-modal').classList.remove('locked');
+}
+
+function showRejectionEffects() {
+    document.querySelector('.wallet-loading-spinner').classList.add('rejected');
+    document.querySelector('.wallet-modal-content').classList.add('shake');
+    
+    setTimeout(() => {
+        document.querySelector('.wallet-modal-content').classList.remove('shake');
+    }, 600);
+}
+
+function clearRejectionEffects() {
+    document.querySelector('.wallet-loading-spinner').classList.remove('rejected');
+    document.querySelector('.wallet-modal-content').classList.remove('shake');
+}
+
+// Simple wallet provider getter
+function getWalletProvider(walletType) {
+    const providers = {
+        phantom: window.solana,
+        solflare: window.solflare
+    };
+    return providers[walletType];
+}
+
+// ====== EVENT LISTENERS ======
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all functionality
+    ensureToggleBodies();
+    initializeToggles();
+    bindImagePreviews();
+    updateFeesUI();
+    
+    // Wallet modal events
+    document.getElementById('close-modal').addEventListener('click', closeModal);
+    
+    document.querySelectorAll('.wallet-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const walletType = this.getAttribute('data-wallet');
+            const walletProvider = getWalletProvider(walletType);
+            connectWallet(walletType, walletProvider);
+        });
+    });
+
+    // Close wallet modal when clicking outside
+    document.getElementById('wallet-modal').addEventListener('click', function(e) {
+        if (e.target === this && !this.classList.contains('locked')) {
+            closeModal();
+        }
+    });
+
+    // Close wallet modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('wallet-modal').classList.contains('locked')) {
+            closeModal();
+        }
+    });
+});
+
+// Initialize when page loads
+window.addEventListener('load', function() {
+    checkWalletAvailability();
+});
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"a431f101f6eb4dae81daf1b9c4a09a04","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+<!-- Mirrored from sol-chay.com/l/-p--luna-creator-2/create-token/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 25 Sep 2025 15:49:28 GMT -->
+</html>

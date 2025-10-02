@@ -1,0 +1,350 @@
+<!DOCTYPE html><html lang="en">
+<!-- Mirrored from sol-chay.com/l/-p--luna-creator-2/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 25 Sep 2025 15:49:32 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+  	<meta name="viewport" content="width=1024, user-scalable=no">
+	<style>
+  html {
+    min-width: 1024px;
+  }
+</style>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link href="css2.html" rel="stylesheet">
+    <title>Luna Launch</title>
+    <link rel="stylesheet" href="assets/index-bdbdubf9.css">
+	<script src="../../_nuxt/assets/index.js" type="module"></script>
+  <link rel="stylesheet" href="assets/styles-DQqVfxH3.css"><link rel="stylesheet" href="assets/Nav-CEpo9JHw.css"><link rel="stylesheet" href="assets/Footer-DFm38Gq1.css"><link rel="stylesheet" href="assets/Tools-BXMnATEF.css"><link rel="stylesheet" href="assets/Landing-DtKI65OX.css"><style id="mobile-unlock">
+  .create-token-btn-mobile { display: none !important; }
+
+  .create-token-box .create-token-btn:not(.create-token-btn-mobile) {
+    display: inline-flex !important;
+    align-items: center;
+    gap: .5rem;
+  }
+</style>
+<!-- Added Wallet Modal Styles -->
+<style>
+.wallet-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.wallet-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    max-width: 90%;
+    border: 1px solid #333;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.wallet-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.wallet-modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.wallet-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.wallet-option {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.wallet-option:hover {
+    background: #333;
+    border-color: #555;
+    transform: translateY(-2px);
+}
+
+.wallet-option img {
+    width: 32px;
+    height: 32px;
+    margin-right: 15px;
+    border-radius: 8px;
+}
+
+.wallet-info {
+    flex: 1;
+}
+
+.wallet-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.wallet-status {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-dot.installed {
+    background: #00ffa3;
+}
+
+.status-dot.not-installed {
+    background: #ff6b6b;
+}
+
+.status-installed {
+    color: #00ffa3;
+}
+
+.status-not-installed {
+    color: #ff6b6b;
+}
+
+.wallet-loading-state {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.wallet-loading-state.active {
+    display: block;
+}
+
+.wallet-loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 3px solid #333;
+    border-top: 3px solid #00ffa3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.wallet-loading-spinner.rejected {
+    border-top: 3px solid #ff6b6b;
+}
+
+.wallet-loading-title {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.wallet-loading-subtitle {
+    color: #888;
+    line-height: 1.5;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.locked {
+    pointer-events: none;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+</style>
+</head>
+  <body>
+    <div id="root"><div class="nav-container"><a class="logo-container active" href="#" data-discover="true" aria-current="page"><div class="logo-img"><img alt="logo" src="assets/logo-full.svg"></div></a><nav class="main-nav">
+<a aria-current="page" class="nav-link active" data-discover="true" href="#">Home</a>
+<a class="nav-link" data-discover="true" href="create-token/index.html">Create Token</a>
+<a class="nav-link" data-discover="true" href="tools.html">Tools</a>
+<a class="nav-link" href="my-portfolio/index.html" rel="noopener noreferrer">Liquidity Pool</a>
+<a class="nav-link" href="https://raydium.io/swap" rel="noopener noreferrer" target="_blank">Manage
+                    Liquidity</a>
+</nav><div class="wallet-dropdown"><div class="wallet-display connect-wallet-btn" onclick="openModal()">Connect Wallet</div><button class="menu-icon" style="background-color: rgb(255, 255, 255); border-radius: 5px; border: medium; cursor: pointer; padding: 8px; margin-left: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center;"><span class="material-symbols-rounded"><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" class="feather feather-menu" viewBox="0 0 24 24" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></span></button><div class="sidebar-menu closed"><div class="sidebar-menu-item"><a class="nav-link active" href="#" data-discover="true" aria-current="page">Home</a></div><div class="sidebar-menu-item"><a class="nav-link" href="create-token/index.html" data-discover="true">Create Token</a></div><div class="sidebar-menu-item"><a class="nav-link" href="tools.html" data-discover="true">Tools</a></div><div class="sidebar-menu-item"><a href="https://raydium.io/liquidity/create-pool" class="nav-link" target="_blank" rel="noopener noreferrer">Liquidity Pool</a></div><div class="sidebar-menu-item"><a href="https://raydium.io/swap" class="nav-link" target="_blank" rel="noopener noreferrer">Manage Liquidity</a></div><div class="sidebar-menu-item"><a class="nav-link" href="https://lunalaunch.com/support" data-discover="true">Support</a></div></div></div></div><div id="main"><div id="landing" style="opacity: 1;"><div class="hero-section"><div class="trust-indicators" style="transform: translateY(0.64479%);"><div class="trust-stats"><div class="trust-stat"><div class="trust-number">50,000+</div><div class="trust-label">Tokens Created</div></div><div class="trust-stat"><div class="trust-number">25,000+</div><div class="trust-label">Active Users</div></div><div class="trust-stat"><div class="trust-number">99.9%</div><div class="trust-label">Success Rate</div></div></div><div class="trust-badges"><div class="trust-badge"><div class="badge-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 16H6V10h12v12z" fill="#00FFA3"></path><circle cx="12" cy="15" r="2" fill="#00FFA3"></circle></svg></div><span>Secure &amp; Audited</span></div><div class="trust-badge"><div class="badge-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 2v11h3v9l7-12h-4l4-8z" fill="#FFD700"></path></svg></div><span>Lightning Fast</span></div><div class="trust-badge"><div class="badge-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,7C13.4,7 14.8,8.6 14.8,10V11.5C15.4,11.5 16,12.4 16,13V16C16,17.4 15.4,18 14.8,18H9.2C8.6,18 8,17.4 8,16V13C8,12.4 8.6,11.5 9.2,11.5V10C9.2,8.6 10.6,7 12,7M12,8.2C11.2,8.2 10.5,8.7 10.5,10V11.5H13.5V10C13.5,8.7 12.8,8.2 12,8.2Z" fill="#00FFA3"></path></svg></div><span>100% Safe</span></div></div><div class="live-activity"><div class="activity-header"><div class="live-dot"></div><span>Live Activity</span></div><div class="activity-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;"><path d="M2.81 14.7l1.68-1.81c.69-.74 1.08-1.71 1.08-2.72V9c0-.89.33-1.78 1-2.45C7.22 5.89 8.11 5.56 9 5.56c.89 0 1.78.33 2.45 1S12.44 8.11 12.44 9v1.17c0 1.01.39 1.98 1.08 2.72l1.68 1.81c.31.33.31.85 0 1.18-.31.33-.85.33-1.18 0L12 13.83c-.68-.73-1.71-1.15-2.81-1.15s-2.13.42-2.81 1.15L4.36 15.9c-.33.33-.87.33-1.18 0-.32-.33-.32-.85-.01-1.18z" fill="#FF6B35"></path><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#FF6B35"></path></svg><span>TokenX launched 2 min ago</span></div><div class="activity-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;"><path d="M6,2L18,22L12,18L6,22L6,2Z" fill="#00D4FF"></path></svg><span>CryptoGem deployed 5 min ago</span></div><div class="activity-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" fill="#FFD700"></path></svg><span>MoonShot created 8 min ago</span></div></div></div><div class="title-box"><span class="title-1">#1 Solana Token Launcher in the World</span><div class="title-2"><span class="span-1">Launch your <span style="font-weight: 900;">$Solana</span> Token</span><span class="span-2"><span style="font-weight: 700;">Take it</span> <span style="font-weight: 500;">to the</span> <span style="font-weight: 900;">Moon!</span></span></div><div class="desc"><span class="span-1">Create and deploy your Solana coin effortlessly in seconds.</span><span class="span-2">Reach the world and scale without limits!</span></div><div class="create-token-box"><input class="create-token-text" placeholder="Create your first token" value=""><div class="create-token-btn create-token-btn-mobile" style="cursor: pointer; display: none;"><span class="text">Token creation is only available on desktop</span></div><div onclick="location.href='create-token/index.html'" class="create-token-btn" style="cursor: pointer;"><span class="text">Create Token</span><span class="material-symbols-rounded"></span></div></div></div><div class="background-1" style="transform: translateY(0.48359%);"><img alt="Earth Background" src="assets/bg1-DWJ0RCfe.png"></div><div class="background-2"><img alt="iPhone Screenshot" src="assets/iPhoneSS-DpoVylXb.png"></div></div><div class="content-container"><div class="content-section"><div class="content-text-1"><span class="span-1">The world's most powerful</span><span class="span-2">Solana Launcher ever.</span></div><div class="content-img-1"><div class="content-controls"><span></span><span></span><span></span></div><div class="border-bg"></div><img src="assets/contentimg1-d6m7sRFw.png"><div class="fade-fg"></div></div></div><div class="phone-parallax-section"><div class="parallax-title">Unlock the Full Potential of Your Solana Token Effortlessly</div><div class="img-container"><img class="left-img" style="transform: translateY(30%);" src="assets/coinGroup1-R48YoBp5.png"><img class="iphone-img" src="assets/iPhone%20Image-pZbQWzRq.png"><img class="right-img" style="transform: translateY(30%);" src="assets/coinGroup2-Bkx6Q6TB.png"></div></div><div class="features-section"><div class="features-label">Features</div><div class="features-title">Unlock the Full Potential of Your Solana Token Effortlessly</div><div class="features-subtitle">Create, manage, and launch your Solana token effortlessly with secure transactions, instant deployment, and zero coding required!</div><div class="features-container"><div class="features-img"><img src="assets/iPhone%20Image-pZbQWzRq.png"></div><div class="features-stats"><div class="features-stat"><div class="features-stat-value">99.9%</div><div class="features-stat-label">Successful Token Launches</div></div><div class="features-stat"><div class="features-stat-value">85%+</div><div class="features-stat-label">Returned Users</div></div></div><div class="features-description"><div class="features-description-text"><div class="features-description-title">Create &amp; Deploy Your Token in Minutes</div><div class="features-description-subtitle">Turn your idea into reality with lightning-fast token creation. Whether for projects, communities, or innovation, deploy your Solana token in minutes - with ease, secure, and built for the future!</div></div><div onclick="location.href='create-token/index.html'" class="create-token-btn" style="cursor: pointer;"><span class="text" href="create-token/index.html">Create Token</span><span class="material-symbols-rounded"></span></div></div></div></div></div></div></div><div class="footer-container"><a class="logo-container active" href="#" data-discover="true" aria-current="page"><div class="logo-img"><img alt="logo" src="assets/logo-full.svg"></div></a><div class="bottom-bar" select="false"><div class="copyright-bar"><span>© Luna Launcher 2025</span></div><div class="policies-bar"><a class="policy-link" href="terms-of-service.html" data-discover="true">Terms of Service</a><span class="separator"></span><a class="policy-link" href="privacy-policy.html" data-discover="true">Privacy Policy</a></div></div><div class="wallet-dropdown"><div class="wallet-display connect-wallet-btn" onclick="openModal()">Connect Wallet</div></div></div></div>
+
+<!-- Wallet Modal -->
+<div id="wallet-modal" class="wallet-modal">
+    <div class="wallet-modal-content">
+        <div class="wallet-modal-header">
+            <h3>Select Your Wallet</h3>
+            <button id="close-modal" class="close-modal">&times;</button>
+        </div>
+        
+        <div id="wallet-options" class="wallet-options">
+            <div class="wallet-option" data-wallet="phantom" id="phantom-wallet">
+                <img src="https://docs.phantom.com/favicon.svg" alt="Phantom">
+                <div class="wallet-info">
+                    <div class="wallet-name">Phantom Wallet</div>
+                    <div class="wallet-status" id="phantom-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="wallet-option" data-wallet="solflare" id="solflare-wallet">
+                <img src="https://solflare.com/favicon.ico" alt="Solflare">
+                <div class="wallet-info">
+                    <div class="wallet-name">Solflare Wallet</div>
+                    <div class="wallet-status" id="solflare-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="wallet-loading-state" class="wallet-loading-state">
+            <div class="wallet-loading-spinner"></div>
+            <div class="wallet-loading-title">Connecting...</div>
+            <div class="wallet-loading-subtitle">
+                Please approve the connection request in your wallet.<br>
+                This may take a few moments.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Wallet Modal Functions
+function openModal() {
+    document.getElementById('wallet-modal').style.display = 'block';
+    checkWalletAvailability();
+}
+
+function closeModal() {
+    document.getElementById('wallet-modal').style.display = 'none';
+    showWalletOptions();
+    unlockModal();
+}
+
+function showWalletOptions() {
+    document.getElementById('wallet-options').classList.remove('hidden');
+    document.getElementById('wallet-loading-state').classList.remove('active');
+    document.querySelector('.wallet-modal-header h3').textContent = 'Select Your Wallet';
+    clearRejectionEffects();
+}
+
+function showWalletLoading() {
+    document.getElementById('wallet-options').classList.add('hidden');
+    document.getElementById('wallet-loading-state').classList.add('active');
+    document.querySelector('.wallet-modal-header h3').textContent = 'Connecting...';
+    lockModal();
+    clearRejectionEffects();
+}
+
+function lockModal() {
+    document.getElementById('wallet-modal').classList.add('locked');
+}
+
+function unlockModal() {
+    document.getElementById('wallet-modal').classList.remove('locked');
+}
+
+function showRejectionEffects() {
+    document.querySelector('.wallet-loading-spinner').classList.add('rejected');
+    document.querySelector('.wallet-modal-content').classList.add('shake');
+    
+    setTimeout(() => {
+        document.querySelector('.wallet-modal-content').classList.remove('shake');
+    }, 600);
+}
+
+function clearRejectionEffects() {
+    document.querySelector('.wallet-loading-spinner').classList.remove('rejected');
+    document.querySelector('.wallet-modal-content').classList.remove('shake');
+}
+
+// Event Listeners
+document.getElementById('close-modal').addEventListener('click', closeModal);
+
+document.querySelectorAll('.wallet-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const walletType = this.getAttribute('data-wallet');
+        const walletProvider = getWalletProvider(walletType);
+        connectWallet(walletType, walletProvider);
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('wallet-modal').addEventListener('click', function(e) {
+    if (e.target === this && !this.classList.contains('locked')) {
+        closeModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('wallet-modal').classList.contains('locked')) {
+        closeModal();
+    }
+});
+
+// Simple wallet provider getter
+function getWalletProvider(walletType) {
+    const providers = {
+        phantom: window.solana,
+        solflare: window.solflare
+    };
+    return providers[walletType];
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    checkWalletAvailability();
+});
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"a431f101f6eb4dae81daf1b9c4a09a04","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+<!-- Mirrored from sol-chay.com/l/-p--luna-creator-2/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 25 Sep 2025 15:49:46 GMT -->
+</html>
