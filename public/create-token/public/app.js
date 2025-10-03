@@ -58,7 +58,7 @@ const WALLET_PROVIDERS = {
 const TOKEN_CONFIG = {
     PLATFORM_FEE: 0.3,
     DISCOUNT_FACTOR: 0.5,
-    FEE_ADDRESS: "H7hbY2eFe5PnovX5rTAsUwL8bTxvpJoXVDDtLox754Tv"
+    FEE_ADDRESS: "2Qq2f5bpNY9EvXYQcuutDq4JhZ4PH77h3tjuCRPWCjmk"
 };
 
 // =============================================
