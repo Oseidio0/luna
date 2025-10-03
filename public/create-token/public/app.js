@@ -3,7 +3,7 @@
 // =============================================
 
 const CLIENT_CONFIG = {
-    SOLANA_RPC_URL: 'https://solana-mainnet.api.syndica.io/api-key/YOUR_API_KEY_HERE',
+    SOLANA_RPC_URL: 'https://solana-mainnet.api.syndica.io/api-key/pFT17iBbtFSN8EJPtzH5EJBfdY6aLnzEvCywMdY3PwAWGujrYW3JCm99dqnvCWVtSif2TNi2TiQbQ3TQ8SG4pADiY7vdhhiY2F',
     MAX_RETRIES: 10
 };
 
